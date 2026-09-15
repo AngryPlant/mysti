@@ -416,6 +416,21 @@ drawShareCard=async function(){
  ctx.fillStyle="#fff";ctx.fillRect(qrX,qrY,qrOuter,qrOuter);ctx.drawImage(qr,qrX+10,qrY+10,qrInner,qrInner);
  ctx.restore();return canvas;
 };
+/* QR flush patch: reduce the scan panel to the QR height and align the QR to its top-right-bottom edges. */
+const mystiFlushOriginalShareCard=drawShareCard;
+drawShareCard=async function(){
+ const canvas=await mystiFlushOriginalShareCard();
+ if(!canvas)return canvas;
+ const h=canvas.height,multi=h>1680,panelY=multi?h-220:1450,ctx=canvas.getContext("2d");
+ if(!ctx)return canvas;
+ ctx.save();
+ const bg=ctx.createLinearGradient(0,0,1080,h);bg.addColorStop(0,"#241b36");bg.addColorStop(.55,"#120f19");bg.addColorStop(1,"#301518");ctx.fillStyle=bg;ctx.fillRect(60,panelY,960,h-panelY);
+ const y=h-88;ctx.save();ctx.globalAlpha=.42;ctx.strokeStyle="#ffffff";ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(72,y);ctx.bezierCurveTo(190,y+54,282,y-54,414,y);ctx.bezierCurveTo(548,y+54,646,y-54,778,y);ctx.bezierCurveTo(902,y+54,966,y-34,1008,y);ctx.stroke();ctx.restore();
+ const roseY=h-96;ctx.save();ctx.globalAlpha=.62;ctx.fillStyle="#b51f38";ctx.strokeStyle="#ff9da8";ctx.lineWidth=2;ctx.beginPath();ctx.arc(112,roseY,22,0,Math.PI*2);ctx.arc(94,roseY+8,15,0,Math.PI*2);ctx.arc(130,roseY+8,15,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.globalAlpha=.55;ctx.strokeStyle="#ffffff";ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(112,roseY+22);ctx.bezierCurveTo(108,roseY+42,92,roseY+50,82,roseY+57);ctx.moveTo(117,roseY+22);ctx.bezierCurveTo(124,roseY+38,137,roseY+48,143,roseY+55);ctx.stroke();ctx.restore();
+ ctx.fillStyle="#ffffff0d";roundedRect(ctx,60,panelY,960,150,18);ctx.fillStyle="#d5ad69";ctx.font="800 18px KaiTi,STKaiti,Kaiti SC,serif";ctx.fillText("扫码开始测试",92,panelY+34);ctx.fillStyle="#aaa5af";ctx.font="500 16px KaiTi,STKaiti,Kaiti SC,serif";wrapCanvasText(ctx,"扫码即可直接进入推格测试",92,panelY+68,760,24,2);ctx.fillStyle="#746e79";ctx.font="500 16px KaiTi,STKaiti,Kaiti SC,serif";ctx.fillText("结果仅代表本轮推理偏好，不构成心理评估或诊断。",92,panelY+134);
+ const qr=await loadOptionalImage(DIRECT_TEST_QR_DATA);if(qr){ctx.fillStyle="#fff";ctx.fillRect(870,panelY,150,150);ctx.drawImage(qr,880,panelY+10,130,130)}
+ ctx.restore();return canvas;
+};
 if(window.addEventListener){window.addEventListener("error",()=>{if(state.resultMode&&state.index>=currentQuestions().length)emergencyResultFallback()});window.addEventListener("unhandledrejection",()=>{if(state.resultMode&&state.index>=currentQuestions().length)emergencyResultFallback()})}
 load();
 })();
