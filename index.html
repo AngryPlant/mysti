@@ -220,6 +220,20 @@ html.embedded-browser .card,html.embedded-browser .hero-card{box-shadow:none}
 const APP_VERSION="3.2";
 const SHARE_FILENAME=`mysti-result-v${APP_VERSION}.png`;
 const DATA=JSON.parse(document.getElementById("data").textContent);
+/* 特殊人格的搭档只以人格卡字段为准；展示、多人格结果与分享图共用此映射。 */
+const SPECIAL_PARTNER_OVERRIDES={
+ "U-TURN":{code:"QTMD",name:"逻辑警察",intro:"逻辑警察会把你的“凭什么”继续追问到线索与逻辑闭环。"},
+ "QTMD":{code:"U-TURN",name:"路易十六",intro:"路易十六会把精妙诡计继续追问到人物为何如此行动。"}
+};
+Object.entries(SPECIAL_PARTNER_OVERRIDES).forEach(([source,partner])=>{
+ const special=DATA.special&&DATA.special[source];
+ if(special)Object.assign(special,{partnerCode:partner.code,partnerName:partner.name,partnerIntro:partner.intro});
+});
+const specialPartnerMap={};
+Object.values(DATA.special||{}).forEach(s=>{
+ if(s&&s.code&&s.partnerCode&&s.partnerName)specialPartnerMap[s.code]={code:s.partnerCode,name:s.partnerName,intro:s.partnerIntro||""};
+});
+DATA.partnerMap={...(DATA.partnerMap||{}),...specialPartnerMap};
 let avatarCache=null;
 function avatarFor(code){
  if(!avatarCache){
